@@ -29,7 +29,7 @@ public final class RouteConstants {
     /**
      * Base path for all employee-related endpoints
      */
-    public static final String EMPLOYEE_BASE = "/employees";
+    public static final String EMPLOYEE_BASE = "/api/employees";
 
 
     public static final String EMPLOYEE_CREATE = "";
