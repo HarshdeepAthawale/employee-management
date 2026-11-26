@@ -1,0 +1,542 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>EmployeeHub</title>
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  :root {
+    --sidebar-bg: #0f766e;
+    --sidebar-hover: #0d6460;
+    --sidebar-active: #134e4a;
+    --primary: #0f766e;
+    --primary-hover: #0d9488;
+    --danger: #dc2626;
+    --danger-hover: #b91c1c;
+    --edit-color: #2563eb;
+    --bg: #f1f5f9;
+    --card-bg: #ffffff;
+    --border: #e2e8f0;
+    --text: #0f172a;
+    --text-muted: #64748b;
+    --text-sm: 0.8125rem;
+  }
+
+  body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; background: var(--bg); color: var(--text); display: flex; height: 100vh; overflow: hidden; font-size: 14px; }
+
+  /* ── SIDEBAR ── */
+  .sidebar { width: 200px; min-width: 200px; background: var(--sidebar-bg); display: flex; flex-direction: column; color: #fff; }
+  .sidebar-brand { padding: 20px 16px 16px; border-bottom: 1px solid rgba(255,255,255,0.12); }
+  .brand-logo { width: 36px; height: 36px; background: rgba(255,255,255,0.2); border-radius: 8px; display: flex; align-items: center; justify-content: center; font-weight: 700; font-size: 15px; margin-bottom: 8px; }
+  .brand-name { font-size: 13px; font-weight: 600; }
+  .brand-sub  { font-size: 11px; opacity: 0.6; }
+
+  .sidebar-nav { flex: 1; padding: 12px 8px; }
+  .nav-item { display: flex; align-items: center; gap: 10px; padding: 9px 12px; border-radius: 6px; cursor: pointer; font-size: 13px; font-weight: 500; color: rgba(255,255,255,0.8); transition: background .15s; margin-bottom: 2px; }
+  .nav-item:hover { background: var(--sidebar-hover); color: #fff; }
+  .nav-item.active { background: var(--sidebar-active); color: #fff; }
+  .nav-icon { font-size: 15px; width: 18px; text-align: center; }
+
+  .sidebar-footer { padding: 12px 8px 16px; border-top: 1px solid rgba(255,255,255,0.12); }
+  .footer-link { display: block; padding: 6px 12px; font-size: 11.5px; color: rgba(255,255,255,0.55); cursor: pointer; border-radius: 4px; transition: color .15s; text-decoration: none; }
+  .footer-link:hover { color: rgba(255,255,255,0.9); }
+
+  /* ── MAIN ── */
+  .main { flex: 1; display: flex; flex-direction: column; overflow: hidden; }
+  .topbar { padding: 20px 28px 0; }
+  .breadcrumb { font-size: 11px; font-weight: 600; letter-spacing: .08em; color: var(--text-muted); text-transform: uppercase; margin-bottom: 6px; }
+  .page-header { display: flex; align-items: center; justify-content: space-between; }
+  .page-title { font-size: 22px; font-weight: 700; }
+  .btn-primary { background: var(--primary); color: #fff; border: none; padding: 8px 16px; border-radius: 6px; font-size: 13px; font-weight: 600; cursor: pointer; transition: background .15s; white-space: nowrap; }
+  .btn-primary:hover { background: var(--primary-hover); }
+
+  .content { flex: 1; overflow-y: auto; padding: 20px 28px 28px; }
+
+  /* ── STATS ── */
+  .stats-row { display: flex; gap: 16px; margin-bottom: 20px; }
+  .stat-card { background: var(--card-bg); border: 1px solid var(--border); border-radius: 8px; padding: 16px 20px; flex: 1; }
+  .stat-label { font-size: 11px; color: var(--text-muted); text-transform: uppercase; letter-spacing: .06em; margin-bottom: 6px; }
+  .stat-value { font-size: 28px; font-weight: 700; color: var(--text); }
+
+  /* ── DIRECTORY SECTION ── */
+  .section-card { background: var(--card-bg); border: 1px solid var(--border); border-radius: 8px; padding: 20px; }
+  .section-header { margin-bottom: 14px; }
+  .section-title { font-size: 15px; font-weight: 600; }
+  .section-sub { font-size: 12px; color: var(--text-muted); margin-top: 2px; }
+
+  /* ── FILTER BAR ── */
+  .filter-bar { display: flex; align-items: flex-end; gap: 10px; flex-wrap: wrap; margin-bottom: 16px; }
+  .filter-group { display: flex; flex-direction: column; gap: 4px; }
+  .filter-label { font-size: 11px; color: var(--text-muted); font-weight: 500; }
+  .filter-input { border: 1px solid var(--border); border-radius: 5px; padding: 6px 10px; font-size: 13px; outline: none; height: 32px; min-width: 130px; background: #fff; color: var(--text); }
+  .filter-input:focus { border-color: var(--primary); }
+  .filter-actions { display: flex; gap: 6px; align-items: flex-end; }
+  .btn-apply { background: var(--primary); color: #fff; border: none; padding: 0 14px; height: 32px; border-radius: 5px; font-size: 13px; font-weight: 600; cursor: pointer; }
+  .btn-apply:hover { background: var(--primary-hover); }
+  .btn-clear { background: #fff; color: var(--text-muted); border: 1px solid var(--border); padding: 0 14px; height: 32px; border-radius: 5px; font-size: 13px; cursor: pointer; }
+  .btn-clear:hover { background: var(--bg); }
+  .search-wrap { margin-left: auto; display: flex; align-items: flex-end; }
+  .search-input { border: 1px solid var(--border); border-radius: 5px; padding: 6px 10px 6px 32px; font-size: 13px; outline: none; height: 32px; min-width: 190px; background: #fff url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='14' height='14' viewBox='0 0 24 24' fill='none' stroke='%2394a3b8' stroke-width='2'%3E%3Ccircle cx='11' cy='11' r='8'/%3E%3Cpath d='m21 21-4.35-4.35'/%3E%3C/svg%3E") no-repeat 10px center; }
+  .search-input:focus { border-color: var(--primary); }
+
+  /* ── TABLE ── */
+  .table-wrap { overflow-x: auto; }
+  table { width: 100%; border-collapse: collapse; }
+  thead th { font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: .06em; color: var(--text-muted); padding: 8px 12px; border-bottom: 1px solid var(--border); text-align: left; }
+  tbody tr { border-bottom: 1px solid #f1f5f9; }
+  tbody tr:hover { background: #f8fafc; }
+  tbody td { padding: 10px 12px; font-size: 13px; }
+  .action-edit { color: var(--edit-color); cursor: pointer; font-weight: 600; font-size: 12px; margin-right: 10px; }
+  .action-edit:hover { text-decoration: underline; }
+  .action-delete { color: var(--danger); cursor: pointer; font-weight: 600; font-size: 12px; }
+  .action-delete:hover { text-decoration: underline; }
+  .empty-state { text-align: center; padding: 40px; color: var(--text-muted); font-size: 13px; }
+
+  /* ── INSIGHTS ── */
+  .insights-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; }
+  .insight-card { background: var(--card-bg); border: 1px solid var(--border); border-radius: 8px; padding: 20px; }
+  .insight-title { font-size: 13px; font-weight: 600; margin-bottom: 12px; }
+  .insight-row { display: flex; gap: 8px; align-items: center; }
+  .insight-input { flex: 1; border: 1px solid var(--border); border-radius: 5px; padding: 6px 10px; font-size: 13px; outline: none; height: 32px; }
+  .insight-input:focus { border-color: var(--primary); }
+  .btn-check { background: var(--primary); color: #fff; border: none; padding: 0 14px; height: 32px; border-radius: 5px; font-size: 13px; font-weight: 600; cursor: pointer; white-space: nowrap; }
+  .btn-check:hover { background: var(--primary-hover); }
+  .insight-result { margin-top: 10px; font-size: 22px; font-weight: 700; color: var(--text); }
+  .insight-result.text { font-size: 14px; font-weight: 600; color: var(--primary); }
+  .insight-result.dash { font-size: 22px; color: var(--text-muted); }
+  .health-btn { display: inline-flex; align-items: center; gap: 6px; background: var(--primary); color: #fff; border: none; padding: 8px 16px; border-radius: 6px; font-size: 13px; font-weight: 600; cursor: pointer; margin-bottom: 10px; }
+  .health-btn:hover { background: var(--primary-hover); }
+  .health-result { font-size: 14px; font-weight: 600; }
+  .health-result.ok { color: var(--primary); }
+  .health-result.err { color: var(--danger); }
+
+  /* ── MODAL ── */
+  .modal-overlay { position: fixed; inset: 0; background: rgba(0,0,0,.35); z-index: 100; display: flex; align-items: center; justify-content: center; }
+  .modal-overlay.hidden { display: none; }
+  .modal { background: #fff; border-radius: 10px; padding: 28px; width: 420px; max-width: 95vw; }
+  .modal-title { font-size: 16px; font-weight: 700; margin-bottom: 20px; }
+  .form-group { margin-bottom: 14px; }
+  .form-label { display: block; font-size: 12px; font-weight: 600; color: var(--text-muted); margin-bottom: 5px; }
+  .form-input { width: 100%; border: 1px solid var(--border); border-radius: 5px; padding: 8px 10px; font-size: 13px; outline: none; }
+  .form-input:focus { border-color: var(--primary); }
+  .modal-footer { display: flex; gap: 10px; justify-content: flex-end; margin-top: 20px; }
+  .btn-cancel { background: #fff; color: var(--text-muted); border: 1px solid var(--border); padding: 8px 16px; border-radius: 6px; font-size: 13px; cursor: pointer; }
+  .btn-save { background: var(--primary); color: #fff; border: none; padding: 8px 20px; border-radius: 6px; font-size: 13px; font-weight: 600; cursor: pointer; }
+  .btn-save:hover { background: var(--primary-hover); }
+
+  /* ── TOAST ── */
+  #toast { position: fixed; bottom: 24px; right: 24px; background: #0f172a; color: #fff; padding: 10px 18px; border-radius: 7px; font-size: 13px; z-index: 200; opacity: 0; transform: translateY(8px); transition: all .25s; pointer-events: none; }
+  #toast.show { opacity: 1; transform: translateY(0); }
+  #toast.error { background: var(--danger); }
+
+  .hidden { display: none !important; }
+</style>
+</head>
+<body>
+
+<!-- SIDEBAR -->
+<aside class="sidebar">
+  <div class="sidebar-brand">
+    <div class="brand-logo">EM</div>
+    <div class="brand-name">EmployeeHub</div>
+    <div class="brand-sub">Management portal</div>
+  </div>
+  <nav class="sidebar-nav">
+    <div class="nav-item active" id="nav-employees" onclick="showPage('employees')">
+      <span class="nav-icon">≡</span> Employees
+    </div>
+    <div class="nav-item" id="nav-insights" onclick="showPage('insights')">
+      <span class="nav-icon">◈</span> Insights
+    </div>
+  </nav>
+  <div class="sidebar-footer">
+    <a class="footer-link" href="http://localhost:8080/api/swagger-ui.html" target="_blank">API documentation</a>
+    <a class="footer-link" href="http://localhost:8080/api/h2-console" target="_blank">H2 database</a>
+    <a class="footer-link" href="http://localhost:8080/actuator/health" target="_blank">Application health</a>
+  </div>
+</aside>
+
+<!-- MAIN -->
+<div class="main">
+
+  <!-- ── EMPLOYEES PAGE ── -->
+  <div id="page-employees">
+    <div class="topbar">
+      <div class="breadcrumb">Employee Directory</div>
+      <div class="page-header">
+        <h1 class="page-title">Employees</h1>
+        <button class="btn-primary" onclick="openModal()">+ New employee</button>
+      </div>
+    </div>
+    <div class="content">
+      <!-- Stats -->
+      <div class="stats-row">
+        <div class="stat-card">
+          <div class="stat-label">Total employees</div>
+          <div class="stat-value" id="stat-total">—</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-label">Companies</div>
+          <div class="stat-value" id="stat-companies">—</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-label">Designations</div>
+          <div class="stat-value" id="stat-designations">—</div>
+        </div>
+      </div>
+
+      <!-- Directory -->
+      <div class="section-card">
+        <div class="section-header">
+          <div class="section-title">Employee directory</div>
+          <div class="section-sub" id="dir-sub">Loading…</div>
+        </div>
+
+        <!-- Filter bar -->
+        <div class="filter-bar">
+          <div class="filter-group">
+            <span class="filter-label">Designation</span>
+            <input class="filter-input" id="f-designation" placeholder="e.g. Developer">
+          </div>
+          <div class="filter-group">
+            <span class="filter-label">Company</span>
+            <input class="filter-input" id="f-company" placeholder="e.g. Tech Corp">
+          </div>
+          <div class="filter-group">
+            <span class="filter-label">Born after</span>
+            <input class="filter-input" id="f-dob" type="date" style="min-width:150px">
+          </div>
+          <div class="filter-actions">
+            <button class="btn-apply" onclick="applyFilter()">Apply</button>
+            <button class="btn-clear" onclick="clearFilter()">Clear</button>
+          </div>
+          <div class="search-wrap">
+            <input class="search-input" id="f-search" placeholder="Search employee name" oninput="onSearch()">
+          </div>
+        </div>
+
+        <!-- Table -->
+        <div class="table-wrap">
+          <table>
+            <thead>
+              <tr>
+                <th>ID</th>
+                <th>Name</th>
+                <th>Designation</th>
+                <th>Date of Birth</th>
+                <th>Company</th>
+                <th></th>
+              </tr>
+            </thead>
+            <tbody id="emp-tbody">
+              <tr><td colspan="6" class="empty-state">Loading employees…</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ── INSIGHTS PAGE ── -->
+  <div id="page-insights" class="hidden">
+    <div class="topbar">
+      <div class="breadcrumb">Application Tools</div>
+      <div class="page-header">
+        <h1 class="page-title">Insights</h1>
+        <button class="btn-primary" onclick="showPage('employees'); openModal()">+ New employee</button>
+      </div>
+    </div>
+    <div class="content">
+      <div class="insights-grid">
+
+        <!-- Count by designation -->
+        <div class="insight-card">
+          <div class="insight-title">Count by designation</div>
+          <div class="insight-row">
+            <input class="insight-input" id="i-designation" placeholder="e.g. engineer">
+            <button class="btn-check" onclick="checkCount()">Check</button>
+          </div>
+          <div class="insight-result dash" id="i-count-result">—</div>
+        </div>
+
+        <!-- Exists by name -->
+        <div class="insight-card">
+          <div class="insight-title">Employee exists by name</div>
+          <div class="insight-row">
+            <input class="insight-input" id="i-name" placeholder="Employee name">
+            <button class="btn-check" onclick="checkExists()">Check</button>
+          </div>
+          <div class="insight-result dash" id="i-exists-result">—</div>
+        </div>
+
+        <!-- Health -->
+        <div class="insight-card">
+          <div class="insight-title">Service health</div>
+          <button class="health-btn" onclick="checkHealth()">
+            <span>♥</span> Run health check
+          </button>
+          <div id="i-health-result"></div>
+        </div>
+
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<!-- ── MODAL ── -->
+<div class="modal-overlay hidden" id="modal-overlay" onclick="if(event.target===this)closeModal()">
+  <div class="modal">
+    <div class="modal-title" id="modal-title">New Employee</div>
+    <input type="hidden" id="modal-id">
+    <div class="form-group">
+      <label class="form-label">Name <span style="color:red">*</span></label>
+      <input class="form-input" id="f-name" placeholder="Full name (2–20 chars, letters only)">
+    </div>
+    <div class="form-group">
+      <label class="form-label">Designation</label>
+      <input class="form-input" id="f-desg" placeholder="e.g. Software Engineer">
+    </div>
+    <div class="form-group">
+      <label class="form-label">Date of Birth</label>
+      <input class="form-input" id="f-dob-modal" type="date">
+    </div>
+    <div class="form-group">
+      <label class="form-label">Company</label>
+      <input class="form-input" id="f-company-modal" placeholder="e.g. Tech Corp">
+    </div>
+    <div class="modal-footer">
+      <button class="btn-cancel" onclick="closeModal()">Cancel</button>
+      <button class="btn-save" onclick="saveEmployee()">Save</button>
+    </div>
+  </div>
+</div>
+
+<!-- TOAST -->
+<div id="toast"></div>
+
+<script>
+  const API = 'http://localhost:8080/api';
+  let allEmployees = [];
+  let editMode = false;
+
+  // ── NAVIGATION ──
+  function showPage(page) {
+    document.getElementById('page-employees').classList.toggle('hidden', page !== 'employees');
+    document.getElementById('page-insights').classList.toggle('hidden', page !== 'insights');
+    document.getElementById('nav-employees').classList.toggle('active', page === 'employees');
+    document.getElementById('nav-insights').classList.toggle('active', page === 'insights');
+  }
+
+  // ── TOAST ──
+  function toast(msg, isError = false) {
+    const el = document.getElementById('toast');
+    el.textContent = msg;
+    el.className = isError ? 'show error' : 'show';
+    clearTimeout(el._t);
+    el._t = setTimeout(() => el.className = '', 3000);
+  }
+
+  // ── LOAD EMPLOYEES ──
+  async function loadEmployees() {
+    try {
+      const r = await fetch(`${API}/employees`);
+      if (!r.ok) throw new Error(r.status);
+      allEmployees = await r.json();
+      renderTable(allEmployees);
+      updateStats(allEmployees);
+    } catch (e) {
+      document.getElementById('emp-tbody').innerHTML =
+        '<tr><td colspan="6" class="empty-state">Cannot reach backend at ' + API + '. Make sure the server is running.</td></tr>';
+      document.getElementById('dir-sub').textContent = 'Backend offline';
+    }
+  }
+
+  function updateStats(list) {
+    document.getElementById('stat-total').textContent = list.length;
+    const companies = new Set(list.map(e => e.company).filter(Boolean));
+    const desgs = new Set(list.map(e => e.designation).filter(Boolean));
+    document.getElementById('stat-companies').textContent = companies.size;
+    document.getElementById('stat-designations').textContent = desgs.size;
+    document.getElementById('dir-sub').textContent = list.length + ' employees in the directory';
+  }
+
+  function renderTable(list) {
+    const tbody = document.getElementById('emp-tbody');
+    if (!list.length) {
+      tbody.innerHTML = '<tr><td colspan="6" class="empty-state">No employees found.</td></tr>';
+      return;
+    }
+    tbody.innerHTML = list.map(e => `
+      <tr>
+        <td>${e.empId}</td>
+        <td>${e.name || '—'}</td>
+        <td>${e.designation || '—'}</td>
+        <td>${e.dob || '—'}</td>
+        <td>${e.company || '—'}</td>
+        <td>
+          <span class="action-edit" onclick="openEditModal(${e.empId})">Edit</span>
+          <span class="action-delete" onclick="deleteEmployee(${e.empId})">Delete</span>
+        </td>
+      </tr>`).join('');
+  }
+
+  // ── FILTER ──
+  function applyFilter() {
+    const designation = document.getElementById('f-designation').value.trim();
+    const company     = document.getElementById('f-company').value.trim();
+    const dob         = document.getElementById('f-dob').value;
+
+    if (designation && company) {
+      fetchFiltered(`${API}/employees/filter?designation=${encodeURIComponent(designation)}&company=${encodeURIComponent(company)}`);
+    } else if (designation) {
+      fetchFiltered(`${API}/employees/designation/${encodeURIComponent(designation)}`);
+    } else if (company) {
+      fetchFiltered(`${API}/employees/company/${encodeURIComponent(company)}`);
+    } else if (dob) {
+      fetchFiltered(`${API}/employees/born-after?date=${dob}`);
+    } else {
+      renderTable(allEmployees);
+      updateStats(allEmployees);
+    }
+  }
+
+  async function fetchFiltered(url) {
+    try {
+      const r = await fetch(url);
+      const list = await r.json();
+      renderTable(list);
+      document.getElementById('dir-sub').textContent = list.length + ' employees found';
+    } catch { toast('Filter request failed', true); }
+  }
+
+  function clearFilter() {
+    ['f-designation','f-company','f-dob','f-search'].forEach(id => document.getElementById(id).value = '');
+    renderTable(allEmployees);
+    updateStats(allEmployees);
+  }
+
+  function onSearch() {
+    const q = document.getElementById('f-search').value.trim();
+    if (!q) { renderTable(allEmployees); return; }
+    fetchFiltered(`${API}/employees/search?name=${encodeURIComponent(q)}`);
+  }
+
+  // ── MODAL ──
+  function openModal() {
+    editMode = false;
+    document.getElementById('modal-title').textContent = 'New Employee';
+    document.getElementById('modal-id').value = '';
+    ['f-name','f-desg','f-company-modal'].forEach(id => document.getElementById(id).value = '');
+    document.getElementById('f-dob-modal').value = '';
+    document.getElementById('modal-overlay').classList.remove('hidden');
+  }
+
+  async function openEditModal(id) {
+    try {
+      const r = await fetch(`${API}/employees/${id}`);
+      const e = await r.json();
+      editMode = true;
+      document.getElementById('modal-title').textContent = 'Edit Employee';
+      document.getElementById('modal-id').value = e.empId;
+      document.getElementById('f-name').value = e.name || '';
+      document.getElementById('f-desg').value = e.designation || '';
+      document.getElementById('f-dob-modal').value = e.dob || '';
+      document.getElementById('f-company-modal').value = e.company || '';
+      document.getElementById('modal-overlay').classList.remove('hidden');
+    } catch { toast('Could not load employee', true); }
+  }
+
+  function closeModal() {
+    document.getElementById('modal-overlay').classList.add('hidden');
+  }
+
+  async function saveEmployee() {
+    const id  = document.getElementById('modal-id').value;
+    const body = {
+      name:        document.getElementById('f-name').value.trim(),
+      designation: document.getElementById('f-desg').value.trim(),
+      dob:         document.getElementById('f-dob-modal').value || null,
+      company:     document.getElementById('f-company-modal').value.trim()
+    };
+    if (!body.name) { toast('Name is required', true); return; }
+
+    const url    = editMode ? `${API}/employees/${id}` : `${API}/employees`;
+    const method = editMode ? 'PUT' : 'POST';
+
+    try {
+      const r = await fetch(url, {
+        method,
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(body)
+      });
+      if (!r.ok) {
+        const err = await r.json().catch(() => ({}));
+        toast(err.message || 'Save failed', true);
+        return;
+      }
+      closeModal();
+      toast(editMode ? 'Employee updated!' : 'Employee created!');
+      loadEmployees();
+    } catch { toast('Network error', true); }
+  }
+
+  // ── DELETE ──
+  async function deleteEmployee(id) {
+    if (!confirm('Delete this employee?')) return;
+    try {
+      const r = await fetch(`${API}/employees/${id}`, { method: 'DELETE' });
+      if (r.status === 204 || r.ok) {
+        toast('Employee deleted');
+        loadEmployees();
+      } else {
+        toast('Delete failed', true);
+      }
+    } catch { toast('Network error', true); }
+  }
+
+  // ── INSIGHTS ──
+  async function checkCount() {
+    const des = document.getElementById('i-designation').value.trim();
+    if (!des) return;
+    try {
+      const r = await fetch(`${API}/employees/count/designation/${encodeURIComponent(des)}`);
+      const n = await r.json();
+      const el = document.getElementById('i-count-result');
+      el.textContent = n;
+      el.className = 'insight-result';
+    } catch { toast('Request failed', true); }
+  }
+
+  async function checkExists() {
+    const name = document.getElementById('i-name').value.trim();
+    if (!name) return;
+    try {
+      const r = await fetch(`${API}/employees/exists?name=${encodeURIComponent(name)}`);
+      const exists = await r.json();
+      const el = document.getElementById('i-exists-result');
+      el.textContent = exists ? 'Yes — employee found' : 'No — not found';
+      el.className = 'insight-result text';
+    } catch { toast('Request failed', true); }
+  }
+
+  async function checkHealth() {
+    const el = document.getElementById('i-health-result');
+    try {
+      const r = await fetch(`${API}/employees/health`);
+      const msg = await r.text();
+      el.textContent = msg;
+      el.className = 'health-result ok';
+    } catch {
+      el.textContent = 'Backend is unreachable';
+      el.className = 'health-result err';
+    }
+  }
+
+  // ── INIT ──
+  loadEmployees();
+</script>
+</body>
+</html>
