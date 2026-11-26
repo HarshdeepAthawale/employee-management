@@ -205,6 +205,27 @@ public class ExceptionAdvice {
     }
 
     /**
+     * Handle IllegalStateException (Business rule / state conflict)
+     *
+     * @param ex The exception that was thrown
+     * @param request The web request that caused the exception
+     * @return ResponseEntity with 409 status and error details
+     */
+    @ExceptionHandler(IllegalStateException.class)
+    public ResponseEntity<ErrorResponse> handleIllegalStateException(IllegalStateException ex, WebRequest request) {
+        logger.warn("State conflict: {}", ex.getMessage());
+
+        ErrorResponse errorResponse = new ErrorResponse(
+                HttpStatus.CONFLICT.value(),
+                "State conflict",
+                ex.getMessage(),
+                request.getDescription(false)
+        );
+
+        return ResponseEntity.status(HttpStatus.CONFLICT).body(errorResponse);
+    }
+
+    /**
      * Handle DataIntegrityViolationException (Database constraint violations)
      * 
      * @param ex The exception that was thrown

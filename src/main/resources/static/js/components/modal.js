@@ -43,6 +43,8 @@ export async function showEmployeeModal(employee, onSave) {
   const isEdit = !!employee;
   const val = k => employee?.[k] ?? '';
   const dobVal = val('dob') ? (Array.isArray(val('dob')) ? val('dob').join('-') : val('dob')) : '';
+  const joinVal = val('joiningDate') ? (Array.isArray(val('joiningDate')) ? val('joiningDate').join('-') : val('joiningDate')) : '';
+  const statusVal = employee?.status || 'ACTIVE';
   const deptId = employee?.department?.id ?? '';
 
   let departments = [];
@@ -84,6 +86,21 @@ export async function showEmployeeModal(employee, onSave) {
           ${deptOptions}
         </select>
       </div>
+      <div class="form-group">
+        <label class="form-label">Status</label>
+        <select class="form-control" id="f-status">
+          <option value="ACTIVE"${statusVal === 'ACTIVE' ? ' selected' : ''}>Active</option>
+          <option value="INACTIVE"${statusVal === 'INACTIVE' ? ' selected' : ''}>Inactive</option>
+          <option value="ON_LEAVE"${statusVal === 'ON_LEAVE' ? ' selected' : ''}>On Leave</option>
+        </select>
+      </div>
+    </div>
+    <div class="form-row">
+      <div class="form-group">
+        <label class="form-label">Joining Date</label>
+        <input class="form-control" id="f-joining" type="date" value="${joinVal}">
+      </div>
+      <div class="form-group"></div>
     </div>
   `;
 
@@ -106,6 +123,8 @@ export async function showEmployeeModal(employee, onSave) {
         dob: backdrop.querySelector('#f-dob').value || null,
         company: backdrop.querySelector('#f-company').value.trim() || null,
         department: selDept ? { id: Number(selDept) } : null,
+        joiningDate: backdrop.querySelector('#f-joining').value || null,
+        status: backdrop.querySelector('#f-status').value || 'ACTIVE',
       };
       onSave(data);
       closeModal();

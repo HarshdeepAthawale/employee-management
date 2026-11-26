@@ -1,7 +1,11 @@
 package in.masti.service;
 
 import in.masti.entity.Employee;
+import in.masti.repository.AttendanceRepository;
 import in.masti.repository.EmployeeRepository;
+import in.masti.repository.LeaveBalanceRepository;
+import in.masti.repository.LeaveRequestRepository;
+import in.masti.repository.SalaryRepository;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -35,15 +39,31 @@ public class EmployeeServiceImpl implements EmployeeService {
     private static final Logger logger = LoggerFactory.getLogger(EmployeeServiceImpl.class);
     
     private final EmployeeRepository employeeRepo;
+    private final AttendanceRepository attendanceRepo;
+    private final LeaveRequestRepository leaveRequestRepo;
+    private final LeaveBalanceRepository leaveBalanceRepo;
+    private final SalaryRepository salaryRepo;
 
     /**
      * Constructor-based dependency injection
-     * 
+     *
      * @param employeeRepo The employee repository dependency
+     * @param attendanceRepo Attendance repository (cascade delete on employee removal)
+     * @param leaveRequestRepo Leave request repository (cascade delete on employee removal)
+     * @param leaveBalanceRepo Leave balance repository (cascade delete on employee removal)
+     * @param salaryRepo Salary repository (cascade delete on employee removal)
      */
     @Autowired
-    public EmployeeServiceImpl(EmployeeRepository employeeRepo) {
+    public EmployeeServiceImpl(EmployeeRepository employeeRepo,
+                               AttendanceRepository attendanceRepo,
+                               LeaveRequestRepository leaveRequestRepo,
+                               LeaveBalanceRepository leaveBalanceRepo,
+                               SalaryRepository salaryRepo) {
         this.employeeRepo = employeeRepo;
+        this.attendanceRepo = attendanceRepo;
+        this.leaveRequestRepo = leaveRequestRepo;
+        this.leaveBalanceRepo = leaveBalanceRepo;
+        this.salaryRepo = salaryRepo;
     }
 
     /**
@@ -167,7 +187,13 @@ public class EmployeeServiceImpl implements EmployeeService {
                         logger.warn("No employee found with ID {} for deletion", id);
                         return new NoSuchElementException("No employee found for ID: " + id + " for deletion");
                     });
-            
+
+            // Cascade: remove related records so the FK constraints don't block the delete
+            attendanceRepo.deleteByEmployeeEmpId(id);
+            leaveRequestRepo.deleteByEmployeeEmpId(id);
+            leaveBalanceRepo.deleteByEmployeeEmpId(id);
+            salaryRepo.deleteByEmployeeEmpId(id);
+
             employeeRepo.delete(employee);
             logger.info("Successfully deleted employee with ID: {}", id);
         } catch (NoSuchElementException e) {
@@ -394,7 +420,9 @@ public class EmployeeServiceImpl implements EmployeeService {
             existingEmployee.setDob(employee.getDob());
             existingEmployee.setCompany(employee.getCompany());
             existingEmployee.setDepartment(employee.getDepartment());
-            
+            existingEmployee.setJoiningDate(employee.getJoiningDate());
+            existingEmployee.setStatus(employee.getStatus());
+
             Employee updatedEmployee = employeeRepo.saveAndFlush(existingEmployee);
             logger.info("Successfully updated employee with ID: {}", id);
             return updatedEmployee;
@@ -434,6 +462,9 @@ public class EmployeeServiceImpl implements EmployeeService {
                     });
             
             // Update only non-null fields
+            if (employee.getJoiningDate() != null && employee.getJoiningDate().isAfter(LocalDate.now())) {
+                throw new IllegalArgumentException("Joining date cannot be in the future");
+            }
             if (StringUtils.hasText(employee.getName())) {
                 existingEmployee.setName(employee.getName());
             }
@@ -449,11 +480,17 @@ public class EmployeeServiceImpl implements EmployeeService {
             if (employee.getDepartment() != null) {
                 existingEmployee.setDepartment(employee.getDepartment());
             }
+            if (employee.getJoiningDate() != null) {
+                existingEmployee.setJoiningDate(employee.getJoiningDate());
+            }
+            if (employee.getStatus() != null) {
+                existingEmployee.setStatus(employee.getStatus());
+            }
 
             Employee patchedEmployee = employeeRepo.saveAndFlush(existingEmployee);
             logger.info("Successfully patched employee with ID: {}", id);
             return patchedEmployee;
-        } catch (NoSuchElementException e) {
+        } catch (NoSuchElementException | IllegalArgumentException e) {
             throw e;
         } catch (Exception e) {
             logger.error("Error patching employee with ID {}: {}", id, e.getMessage(), e);
@@ -490,6 +527,10 @@ public class EmployeeServiceImpl implements EmployeeService {
         
         if (employee.getDob() != null && employee.getDob().isAfter(LocalDate.now())) {
             throw new IllegalArgumentException("Date of birth cannot be in the future");
+        }
+
+        if (employee.getJoiningDate() != null && employee.getJoiningDate().isAfter(LocalDate.now())) {
+            throw new IllegalArgumentException("Joining date cannot be in the future");
         }
     }
 }

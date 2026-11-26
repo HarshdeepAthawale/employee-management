@@ -6,6 +6,7 @@ import jakarta.validation.constraints.*;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.time.temporal.ChronoUnit;
 
 /**
  * Employee Entity Class
@@ -82,7 +83,26 @@ public class Employee {
     @JoinColumn(name = "department_id")
     @Schema(description = "Department the employee belongs to")
     private Department department;
-    
+
+    /**
+     * Date the employee joined the company
+     *
+     * @PastOrPresent ensures the joining date is not in the future
+     */
+    @PastOrPresent(message = "Joining date cannot be in the future")
+    @Schema(description = "Date the employee joined the company", example = "2024-01-15", type = "string", format = "date")
+    private LocalDate joiningDate;
+
+    /**
+     * Employment status (ACTIVE, INACTIVE, ON_LEAVE)
+     *
+     * Defaults to ACTIVE; null values read back as ACTIVE for legacy rows.
+     */
+    @Enumerated(EnumType.STRING)
+    @Column(length = 20)
+    @Schema(description = "Employment status", example = "ACTIVE")
+    private EmployeeStatus status = EmployeeStatus.ACTIVE;
+
     /**
      * Creation timestamp - Transient field (not persisted to database)
      * 
@@ -155,6 +175,35 @@ public class Employee {
         this.department = department;
     }
 
+    public LocalDate getJoiningDate() {
+        return joiningDate;
+    }
+
+    public void setJoiningDate(LocalDate joiningDate) {
+        this.joiningDate = joiningDate;
+    }
+
+    /**
+     * Status never reads back as null — legacy rows without a status are ACTIVE.
+     */
+    public EmployeeStatus getStatus() {
+        return status == null ? EmployeeStatus.ACTIVE : status;
+    }
+
+    public void setStatus(EmployeeStatus status) {
+        this.status = status;
+    }
+
+    /**
+     * Tenure in whole months since the joining date.
+     * Derived value — not persisted. -1 when no joining date is set.
+     */
+    @Schema(description = "Tenure in whole months since joining (null when no joining date)", example = "22", accessMode = Schema.AccessMode.READ_ONLY)
+    public Long getTenureMonths() {
+        if (joiningDate == null) return null;
+        return ChronoUnit.MONTHS.between(joiningDate, LocalDate.now());
+    }
+
     public LocalDateTime getCreationTime() {
         return creationTime;
     }
@@ -174,6 +223,8 @@ public class Employee {
                 ", designation='" + designation + '\'' +
                 ", dob=" + dob +
                 ", company='" + company + '\'' +
+                ", joiningDate=" + joiningDate +
+                ", status=" + status +
                 ", creationTime=" + creationTime +
                 '}';
     }

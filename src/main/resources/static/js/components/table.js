@@ -21,6 +21,23 @@ function formatDate(dob) {
   return dob;
 }
 
+const STATUS_BADGE = {
+  ACTIVE: 'badge-green',
+  INACTIVE: 'badge-gray',
+  ON_LEAVE: 'badge-amber',
+};
+
+function tenureText(joiningDate) {
+  if (!joiningDate) return null;
+  const j = Array.isArray(joiningDate) ? new Date(joiningDate[0], joiningDate[1] - 1, joiningDate[2]) : new Date(joiningDate);
+  if (isNaN(j)) return null;
+  const months = (new Date().getFullYear() - j.getFullYear()) * 12 + (new Date().getMonth() - j.getMonth());
+  if (months < 1) return 'new';
+  const y = Math.floor(months / 12);
+  const m = months % 12;
+  return y > 0 ? `${y}y ${m}m` : `${m}m`;
+}
+
 let _sortKey = null;
 let _sortAsc = true;
 
@@ -61,7 +78,9 @@ export function renderTable(container, employees, { onEdit, onDelete }) {
           <th class="${thClass('designation')}" data-sort="designation">Designation</th>
           <th class="${thClass('company')}"  data-sort="company">Company</th>
           <th data-sort="department">Department</th>
+          <th class="${thClass('status')}"   data-sort="status">Status</th>
           <th class="${thClass('dob')}"      data-sort="dob">Date of Birth</th>
+          <th class="${thClass('joiningDate')}" data-sort="joiningDate">Joined</th>
           <th>Actions</th>
         </tr>
       </thead>
@@ -80,7 +99,12 @@ export function renderTable(container, employees, { onEdit, onDelete }) {
             <td>${emp.designation ? `<span class="badge ${badgeClass(emp.designation)}">${emp.designation}</span>` : '<span style="color:var(--text-muted)">—</span>'}</td>
             <td>${emp.company || '<span style="color:var(--text-muted)">—</span>'}</td>
             <td>${emp.department ? `<span class="badge badge-blue">${emp.department.name}</span>` : '<span style="color:var(--text-muted)">—</span>'}</td>
+            <td><span class="badge ${STATUS_BADGE[emp.status] || 'badge-gray'}">${emp.status || 'ACTIVE'}</span></td>
             <td style="color:var(--text-secondary)">${formatDate(emp.dob)}</td>
+            <td style="color:var(--text-secondary)">
+              ${emp.joiningDate ? formatDate(emp.joiningDate) : '—'}
+              ${tenureText(emp.joiningDate) ? `<span class="badge badge-purple" style="margin-left:6px">${tenureText(emp.joiningDate)}</span>` : ''}
+            </td>
             <td>
               <div class="actions-cell">
                 <button class="btn btn-outline btn-sm btn-edit" data-id="${emp.empId}" title="Edit">

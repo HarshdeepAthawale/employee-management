@@ -44,6 +44,10 @@ export async function renderEmployeesPage(el) {
       <select class="filter-select" id="filter-company">
         <option value="">All companies</option>
       </select>
+      <select class="filter-select" id="filter-status">
+        <option value="">All statuses</option>
+        <option>ACTIVE</option><option>INACTIVE</option><option>ON_LEAVE</option>
+      </select>
       <button class="btn btn-outline" id="btn-clear">Clear</button>
     </div>
 
@@ -58,6 +62,7 @@ export async function renderEmployeesPage(el) {
   el.querySelector('#search-input').oninput = applyFilter;
   el.querySelector('#filter-desig').onchange = applyFilter;
   el.querySelector('#filter-company').onchange = applyFilter;
+  el.querySelector('#filter-status').onchange = applyFilter;
   el.querySelector('#btn-clear').onclick = clearFilter;
 
   await loadEmployees();
@@ -95,10 +100,12 @@ function applyFilter() {
   const search = (document.getElementById('search-input')?.value ?? '').toLowerCase();
   const desig  = document.getElementById('filter-desig')?.value ?? '';
   const comp   = document.getElementById('filter-company')?.value ?? '';
+  const status = document.getElementById('filter-status')?.value ?? '';
   _filtered = _all.filter(e => {
     if (search && !(e.name ?? '').toLowerCase().includes(search)) return false;
     if (desig  && e.designation !== desig) return false;
     if (comp   && e.company !== comp) return false;
+    if (status && (e.status || 'ACTIVE') !== status) return false;
     return true;
   });
   renderTable(_tableContainer, _filtered, { onEdit, onDelete });
@@ -108,9 +115,11 @@ function clearFilter() {
   const si = document.getElementById('search-input');
   const fd = document.getElementById('filter-desig');
   const fc = document.getElementById('filter-company');
+  const fs = document.getElementById('filter-status');
   if (si) si.value = '';
   if (fd) fd.value = '';
   if (fc) fc.value = '';
+  if (fs) fs.value = '';
   applyFilter();
 }
 
