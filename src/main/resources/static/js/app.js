@@ -2,10 +2,16 @@ import { renderSidebar, setActiveNav } from './components/sidebar.js';
 import { renderEmployeesPage } from './pages/employees.js';
 import { renderDepartmentsPage } from './pages/departments.js';
 import { renderInsightsPage } from './pages/insights.js';
+import { renderAttendancePage } from './pages/attendance.js';
+import { renderLeavesPage } from './pages/leaves.js';
+import { renderSalariesPage } from './pages/salaries.js';
 
 const PAGES = {
   employees:   renderEmployeesPage,
   departments: renderDepartmentsPage,
+  attendance:  renderAttendancePage,
+  leaves:      renderLeavesPage,
+  salaries:    renderSalariesPage,
   insights:    renderInsightsPage,
 };
 

@@ -1,5 +1,8 @@
 const BASE = '/api/employees';
 const DEPT = '/api/departments';
+const ATT = '/api/attendance';
+const LEAVE = '/api/leaves';
+const SAL = '/api/salaries';
 
 async function _req(url, options = {}) {
   const r = await fetch(url, options);
@@ -36,4 +39,34 @@ export const api = {
   deptUpdate:          (id, data)    => _req(`${DEPT}/${id}`, { method: 'PUT', ...json(data) }),
   deptDelete:          id            => _req(`${DEPT}/${id}`, { method: 'DELETE' }),
   deptEmpCount:        id            => _req(`${DEPT}/${id}/employee-count`),
+
+  attCheckIn:   (employeeId, date) => _req(`${ATT}/check-in`, { method: 'POST', ...json({ employeeId, date }) }),
+  attCheckOut:  id            => _req(`${ATT}/${id}/check-out`, { method: 'POST' }),
+  attGetAll:    (params = {})  => {
+    const q = new URLSearchParams();
+    if (params.employeeId) q.set('employeeId', params.employeeId);
+    if (params.from) q.set('from', params.from);
+    if (params.to) q.set('to', params.to);
+    const qs = q.toString();
+    return _req(qs ? `${ATT}?${qs}` : ATT);
+  },
+  attToday:     ()            => _req(`${ATT}/today`),
+  attByEmployee: empId        => _req(`${ATT}/employee/${empId}`),
+  attMonthly:   (empId, year, month) => _req(`${ATT}/employee/${empId}/monthly?year=${year}&month=${month}`),
+  attPatch:     (id, status)  => _req(`${ATT}/${id}`, { method: 'PATCH', ...json({ status }) }),
+  attDelete:    id            => _req(`${ATT}/${id}`, { method: 'DELETE' }),
+
+  leaveApply:      data          => _req(LEAVE, { method: 'POST', ...json(data) }),
+  leaveGetAll:     status        => _req(status ? `${LEAVE}?status=${status}` : LEAVE),
+  leaveByEmployee: empId         => _req(`${LEAVE}/employee/${empId}`),
+  leaveDecide:     (id, status)  => _req(`${LEAVE}/${id}/status`, { method: 'PUT', ...json({ status }) }),
+  leaveDelete:     id            => _req(`${LEAVE}/${id}`, { method: 'DELETE' }),
+  leaveBalance:    (empId, year) => _req(`${LEAVE}/employee/${empId}/balance${year ? `?year=${year}` : ''}`),
+
+  salCreate:       data          => _req(SAL, { method: 'POST', ...json(data) }),
+  salGetAll:       ()            => _req(SAL),
+  salByEmployee:   empId         => _req(`${SAL}/employee/${empId}`),
+  salCurrent:      empId         => _req(`${SAL}/employee/${empId}/current`),
+  salUpdate:       (id, data)    => _req(`${SAL}/${id}`, { method: 'PUT', ...json(data) }),
+  salDelete:       id            => _req(`${SAL}/${id}`, { method: 'DELETE' }),
 };

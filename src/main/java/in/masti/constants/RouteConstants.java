@@ -78,6 +78,37 @@ public final class RouteConstants {
     public static final String DEPARTMENT_EMPLOYEE_COUNT = "/{id}/employee-count";
 
     // =============================================================================
+    // ATTENDANCE ROUTES
+    // =============================================================================
+
+    public static final String ATTENDANCE_BASE = "/api/attendance";
+    public static final String ATTENDANCE_CHECK_IN = "/check-in";
+    public static final String ATTENDANCE_CHECK_OUT = "/{id}/check-out";
+    public static final String ATTENDANCE_GET_BY_ID = "/{id}";
+    public static final String ATTENDANCE_TODAY = "/today";
+    public static final String ATTENDANCE_BY_EMPLOYEE = "/employee/{empId}";
+    public static final String ATTENDANCE_MONTHLY = "/employee/{empId}/monthly";
+
+    // =============================================================================
+    // LEAVE ROUTES
+    // =============================================================================
+
+    public static final String LEAVE_BASE = "/api/leaves";
+    public static final String LEAVE_GET_BY_ID = "/{id}";
+    public static final String LEAVE_STATUS = "/{id}/status";
+    public static final String LEAVE_BY_EMPLOYEE = "/employee/{empId}";
+    public static final String LEAVE_BALANCE = "/employee/{empId}/balance";
+
+    // =============================================================================
+    // SALARY ROUTES
+    // =============================================================================
+
+    public static final String SALARY_BASE = "/api/salaries";
+    public static final String SALARY_GET_BY_ID = "/{id}";
+    public static final String SALARY_BY_EMPLOYEE = "/employee/{empId}";
+    public static final String SALARY_CURRENT = "/employee/{empId}/current";
+
+    // =============================================================================
     // H2 CONSOLE ROUTES
     // =============================================================================
 
