@@ -1,3 +1,5 @@
+import { api } from '../api.js';
+
 let _currentModal = null;
 
 export function showModal({ title, body, onConfirm, confirmText = 'Save', confirmClass = 'btn-primary' }) {
@@ -37,10 +39,18 @@ export function closeModal() {
   _currentModal = null;
 }
 
-export function showEmployeeModal(employee, onSave) {
+export async function showEmployeeModal(employee, onSave) {
   const isEdit = !!employee;
   const val = k => employee?.[k] ?? '';
   const dobVal = val('dob') ? (Array.isArray(val('dob')) ? val('dob').join('-') : val('dob')) : '';
+  const deptId = employee?.department?.id ?? '';
+
+  let departments = [];
+  try { departments = await api.deptGetAll(); } catch {}
+
+  const deptOptions = departments.map(d =>
+    `<option value="${d.id}"${d.id === deptId ? ' selected' : ''}>${d.name}</option>`
+  ).join('');
 
   const form = document.createElement('form');
   form.id = 'emp-form';
@@ -66,6 +76,15 @@ export function showEmployeeModal(employee, onSave) {
         <input class="form-control" id="f-company" placeholder="e.g. TechCorp" value="${val('company')}" maxlength="100">
       </div>
     </div>
+    <div class="form-row">
+      <div class="form-group">
+        <label class="form-label">Department</label>
+        <select class="form-control" id="f-department">
+          <option value="">— None —</option>
+          ${deptOptions}
+        </select>
+      </div>
+    </div>
   `;
 
   showModal({
@@ -80,11 +99,13 @@ export function showEmployeeModal(employee, onSave) {
         fg.classList.add('has-error');
         return;
       }
+      const selDept = backdrop.querySelector('#f-department').value;
       const data = {
         name,
         designation: backdrop.querySelector('#f-designation').value.trim() || null,
         dob: backdrop.querySelector('#f-dob').value || null,
         company: backdrop.querySelector('#f-company').value.trim() || null,
+        department: selDept ? { id: Number(selDept) } : null,
       };
       onSave(data);
       closeModal();

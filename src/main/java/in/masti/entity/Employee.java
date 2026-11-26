@@ -77,6 +77,11 @@ public class Employee {
     @Size(max = 100, message = "Company name cannot exceed 100 characters")
     @Schema(description = "Company name where employee works", example = "Tech Corp", maxLength = 100)
     private String company;
+
+    @ManyToOne(fetch = FetchType.EAGER)
+    @JoinColumn(name = "department_id")
+    @Schema(description = "Department the employee belongs to")
+    private Department department;
     
     /**
      * Creation timestamp - Transient field (not persisted to database)
@@ -140,6 +145,14 @@ public class Employee {
 
     public void setCompany(String company) {
         this.company = company;
+    }
+
+    public Department getDepartment() {
+        return department;
+    }
+
+    public void setDepartment(Department department) {
+        this.department = department;
     }
 
     public LocalDateTime getCreationTime() {

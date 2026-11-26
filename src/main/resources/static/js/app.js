@@ -1,10 +1,12 @@
 import { renderSidebar, setActiveNav } from './components/sidebar.js';
 import { renderEmployeesPage } from './pages/employees.js';
+import { renderDepartmentsPage } from './pages/departments.js';
 import { renderInsightsPage } from './pages/insights.js';
 
 const PAGES = {
-  employees: renderEmployeesPage,
-  insights:  renderInsightsPage,
+  employees:   renderEmployeesPage,
+  departments: renderDepartmentsPage,
+  insights:    renderInsightsPage,
 };
 
 function navigate(page) {

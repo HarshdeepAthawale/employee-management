@@ -116,6 +116,8 @@ public interface EmployeeRepository extends JpaRepository<Employee, Integer> {
      */
     boolean existsByName(String name);
 
+    long countByDepartmentId(Integer departmentId);
+
     /**
      * Delete employees by designation
      * 

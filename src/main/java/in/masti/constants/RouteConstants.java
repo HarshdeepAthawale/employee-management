@@ -68,6 +68,16 @@ public final class RouteConstants {
     public static final String EMPLOYEE_HEALTH = "/health";
 
     // =============================================================================
+    // DEPARTMENT ROUTES
+    // =============================================================================
+
+    public static final String DEPARTMENT_BASE = "/api/departments";
+    public static final String DEPARTMENT_GET_BY_ID = "/{id}";
+    public static final String DEPARTMENT_UPDATE = "/{id}";
+    public static final String DEPARTMENT_DELETE = "/{id}";
+    public static final String DEPARTMENT_EMPLOYEE_COUNT = "/{id}/employee-count";
+
+    // =============================================================================
     // H2 CONSOLE ROUTES
     // =============================================================================
 

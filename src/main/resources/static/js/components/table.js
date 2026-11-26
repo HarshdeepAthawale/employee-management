@@ -60,6 +60,7 @@ export function renderTable(container, employees, { onEdit, onDelete }) {
           <th class="${thClass('name')}"     data-sort="name">Name</th>
           <th class="${thClass('designation')}" data-sort="designation">Designation</th>
           <th class="${thClass('company')}"  data-sort="company">Company</th>
+          <th data-sort="department">Department</th>
           <th class="${thClass('dob')}"      data-sort="dob">Date of Birth</th>
           <th>Actions</th>
         </tr>
@@ -78,6 +79,7 @@ export function renderTable(container, employees, { onEdit, onDelete }) {
             </td>
             <td>${emp.designation ? `<span class="badge ${badgeClass(emp.designation)}">${emp.designation}</span>` : '<span style="color:var(--text-muted)">—</span>'}</td>
             <td>${emp.company || '<span style="color:var(--text-muted)">—</span>'}</td>
+            <td>${emp.department ? `<span class="badge badge-blue">${emp.department.name}</span>` : '<span style="color:var(--text-muted)">—</span>'}</td>
             <td style="color:var(--text-secondary)">${formatDate(emp.dob)}</td>
             <td>
               <div class="actions-cell">

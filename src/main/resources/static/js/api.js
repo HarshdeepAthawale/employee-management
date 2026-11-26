@@ -1,4 +1,5 @@
 const BASE = '/api/employees';
+const DEPT = '/api/departments';
 
 async function _req(url, options = {}) {
   const r = await fetch(url, options);
@@ -29,4 +30,10 @@ export const api = {
   countByDesignation:  d             => _req(`${BASE}/count/designation/${encodeURIComponent(d)}`),
   existsByName:        name          => _req(`${BASE}/exists?name=${encodeURIComponent(name)}`),
   health:              ()            => fetch(`${BASE}/health`).then(r => r.text()),
+
+  deptGetAll:          ()            => _req(DEPT),
+  deptCreate:          data          => _req(DEPT, { method: 'POST', ...json(data) }),
+  deptUpdate:          (id, data)    => _req(`${DEPT}/${id}`, { method: 'PUT', ...json(data) }),
+  deptDelete:          id            => _req(`${DEPT}/${id}`, { method: 'DELETE' }),
+  deptEmpCount:        id            => _req(`${DEPT}/${id}/employee-count`),
 };

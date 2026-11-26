@@ -389,11 +389,11 @@ public class EmployeeServiceImpl implements EmployeeService {
                         return new NoSuchElementException("No employee found for ID: " + id + " for update");
                     });
             
-            // Update fields
             existingEmployee.setName(employee.getName());
             existingEmployee.setDesignation(employee.getDesignation());
             existingEmployee.setDob(employee.getDob());
             existingEmployee.setCompany(employee.getCompany());
+            existingEmployee.setDepartment(employee.getDepartment());
             
             Employee updatedEmployee = employeeRepo.saveAndFlush(existingEmployee);
             logger.info("Successfully updated employee with ID: {}", id);
@@ -446,7 +446,10 @@ public class EmployeeServiceImpl implements EmployeeService {
             if (StringUtils.hasText(employee.getCompany())) {
                 existingEmployee.setCompany(employee.getCompany());
             }
-            
+            if (employee.getDepartment() != null) {
+                existingEmployee.setDepartment(employee.getDepartment());
+            }
+
             Employee patchedEmployee = employeeRepo.saveAndFlush(existingEmployee);
             logger.info("Successfully patched employee with ID: {}", id);
             return patchedEmployee;
