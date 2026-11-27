@@ -246,6 +246,7 @@ Send `"department": null` to unassign.
 8. **Joining date + tenure** — `joiningDate` on Employee (validated `@PastOrPresent`), shown in modal + table with tenure badge (`tenureMonths` derived getter)
 9. **Salary management** — `Salary` entity + `/api/salaries` (CRUD + `/employee/{id}/current`); derived `netSalary` = base + allowances − deductions; `#salaries` page with current-salary card, add/edit modal, history table
 10. **Employee status** — `EmployeeStatus` enum (`ACTIVE`/`INACTIVE`/`ON_LEAVE`, default ACTIVE, null reads back as ACTIVE), badge column in employee table, status filter, status select in employee modal
+11. **Auth / RBAC** — Spring Security with JSON login in the SPA, roles ADMIN/HR/EMPLOYEE, cookie CSRF (see "Auth (done)" below)
 
 Deleting an employee cascades to their attendance, leave, and salary records (derived `deleteByEmployeeEmpId` queries in `EmployeeServiceImpl`).
 
@@ -257,11 +258,18 @@ Nothing from the original plan. Possible next ideas:
 
 | Feature | Priority | Notes |
 |---------|----------|-------|
-| **Auth / roles** | High | Spring Security login, ADMIN vs HR vs EMPLOYEE roles (currently fully open) |
+| **DB-backed users** | High | Replace in-memory users (admin/admin123, hr/hr123, emp/emp123) with a JPA `User` entity + `UserDetailsService` |
 | **Attendance calendar view** | Medium | Calendar-style month grid on `#attendance` instead of a flat table |
 | **Payslip PDF** | Medium | Generate a downloadable payslip from a Salary record |
 | **Auto ON_LEAVE attendance** | Low | When a leave is APPROVED, mark attendance ON_LEAVE for those dates |
 | **Dark mode** | Low | CSS custom properties already in place, only light values defined |
+
+### Auth (done)
+- Spring Security, session-based JSON auth: `POST /api/auth/login {username,password}` → user JSON (401 on bad creds), `POST /api/auth/logout`, `GET /api/me`
+- Roles: **ADMIN** all; **HR** manage employees/departments/attendance-records/leave-decisions/salaries; **EMPLOYEE** read + check-in/out + apply leave
+- CSRF: `XSRF-TOKEN` cookie → SPA sends `X-XSRF-TOKEN` header (plain `CsrfTokenRequestAttributeHandler` — the default Xor handler rejects raw cookie values)
+- SPA shows the JS login view (`js/components/login.js`) on any 401; sidebar shows user + role + sign-out; EMPLOYEE can't see Salaries nav
+- Anonymous `/api/**` → 401; wrong role → 403. Public: `/`, static assets, Swagger, H2 console, `/actuator/health`
 
 ---
 
