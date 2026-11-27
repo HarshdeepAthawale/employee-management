@@ -1,3 +1,5 @@
+import { canManage } from '../api.js';
+
 const BADGE_COLORS = {
   Developer: 'badge-teal',
   Manager: 'badge-blue',
@@ -107,6 +109,7 @@ export function renderTable(container, employees, { onEdit, onDelete }) {
             </td>
             <td>
               <div class="actions-cell">
+                ${canManage() ? `
                 <button class="btn btn-outline btn-sm btn-edit" data-id="${emp.empId}" title="Edit">
                   <svg width="13" height="13" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
                     <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/>
@@ -120,7 +123,7 @@ export function renderTable(container, employees, { onEdit, onDelete }) {
                     <path d="M10 11v6"/><path d="M14 11v6"/><path d="M9 6V4h6v2"/>
                   </svg>
                   Delete
-                </button>
+                </button>` : ''}
               </div>
             </td>
           </tr>

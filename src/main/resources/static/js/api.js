@@ -22,6 +22,7 @@ async function _req(url, options = {}) {
   if (r.status === 204) return null;
   const text = await r.text();
   if (!r.ok) {
+    if (r.status === 403) throw new Error('Forbidden — your role is not allowed to do this');
     let msg = text || `HTTP ${r.status}`;
     try { msg = JSON.parse(text).details || JSON.parse(text).message || msg; } catch {}
     throw new Error(msg);
@@ -34,6 +35,12 @@ const json = body => ({
   headers: { 'Content-Type': 'application/json' },
   body: JSON.stringify(body),
 });
+
+/** True when the logged-in user may manage records (ADMIN or HR). EMPLOYEE is read-only + check-in/leave-apply. */
+export function canManage() {
+  const roles = window.APP_USER?.roles || [];
+  return roles.includes('ROLE_ADMIN') || roles.includes('ROLE_HR');
+}
 
 export const api = {
   getAll:              ()            => _req(BASE),

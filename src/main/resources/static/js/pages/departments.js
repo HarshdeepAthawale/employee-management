@@ -1,4 +1,4 @@
-import { api } from '../api.js';
+import { api, canManage } from '../api.js';
 import { showModal, closeModal, showConfirmModal } from '../components/modal.js';
 import { showToast } from '../components/toast.js';
 
@@ -12,12 +12,13 @@ export async function renderDepartmentsPage(el) {
         <div class="page-title">Departments</div>
         <div class="page-subtitle">Manage organizational departments</div>
       </div>
+      ${canManage() ? `
       <button class="btn btn-primary" id="btn-new-dept">
         <svg width="15" height="15" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24">
           <line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/>
         </svg>
         New Department
-      </button>
+      </button>` : ''}
     </div>
 
     <div class="stats-grid" id="dept-stats">
@@ -30,7 +31,7 @@ export async function renderDepartmentsPage(el) {
   `;
 
   _container = el.querySelector('#dept-table-container');
-  el.querySelector('#btn-new-dept').onclick = () => openDeptModal(null);
+  el.querySelector('#btn-new-dept')?.addEventListener('click', () => openDeptModal(null));
   await loadDepartments();
 }
 
@@ -76,6 +77,7 @@ async function renderDeptTable() {
             <td><span class="badge badge-teal">${counts[i]}</span></td>
             <td>
               <div class="actions-cell">
+                ${canManage() ? `
                 <button class="btn btn-outline btn-sm btn-edit-dept" data-id="${d.id}" title="Edit">
                   <svg width="13" height="13" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
                     <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/>
@@ -89,7 +91,7 @@ async function renderDeptTable() {
                     <path d="M10 11v6"/><path d="M14 11v6"/><path d="M9 6V4h6v2"/>
                   </svg>
                   Delete
-                </button>
+                </button>` : ''}
               </div>
             </td>
           </tr>

@@ -1,4 +1,4 @@
-import { api } from '../api.js';
+import { api, canManage } from '../api.js';
 import { renderTable } from '../components/table.js';
 import { showEmployeeModal, showConfirmModal } from '../components/modal.js';
 import { showToast } from '../components/toast.js';
@@ -14,12 +14,13 @@ export async function renderEmployeesPage(el) {
         <div class="page-title">Employees</div>
         <div class="page-subtitle">Manage your team records</div>
       </div>
+      ${canManage() ? `
       <button class="btn btn-primary" id="btn-new">
         <svg width="15" height="15" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24">
           <line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/>
         </svg>
         New Employee
-      </button>
+      </button>` : ''}
     </div>
 
     <div class="stats-grid" id="stats-grid">
@@ -58,7 +59,7 @@ export async function renderEmployeesPage(el) {
 
   _tableContainer = el.querySelector('#table-container');
 
-  el.querySelector('#btn-new').onclick = () => openNewModal();
+  el.querySelector('#btn-new')?.addEventListener('click', () => openNewModal());
   el.querySelector('#search-input').oninput = applyFilter;
   el.querySelector('#filter-desig').onchange = applyFilter;
   el.querySelector('#filter-company').onchange = applyFilter;

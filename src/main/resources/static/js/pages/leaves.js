@@ -1,4 +1,4 @@
-import { api } from '../api.js';
+import { api, canManage } from '../api.js';
 import { showModal, closeModal, showConfirmModal } from '../components/modal.js';
 import { showToast } from '../components/toast.js';
 
@@ -159,7 +159,7 @@ function renderTable() {
             <td><span class="badge ${STATUS_BADGE[r.status] || 'badge-gray'}">${r.status}</span></td>
             <td>
               <div class="actions-cell">
-                ${r.status === 'PENDING' ? `
+                ${r.status === 'PENDING' && canManage() ? `
                   <button class="btn btn-primary btn-sm btn-approve" data-id="${r.id}">Approve</button>
                   <button class="btn btn-outline btn-sm btn-reject" data-id="${r.id}">Reject</button>
                   <button class="btn btn-danger btn-sm btn-del" data-id="${r.id}">Cancel</button>

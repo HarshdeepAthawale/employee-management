@@ -1,4 +1,4 @@
-import { api } from '../api.js';
+import { api, canManage } from '../api.js';
 import { showModal, closeModal, showConfirmModal } from '../components/modal.js';
 import { showToast } from '../components/toast.js';
 
@@ -192,8 +192,9 @@ function renderTable() {
             <td>
               <div class="actions-cell">
                 ${!r.checkOut && r.status === 'PRESENT' ? `<button class="btn btn-primary btn-sm btn-out" data-id="${r.id}">Check Out</button>` : ''}
+                ${canManage() ? `
                 ${r.status === 'PRESENT' ? `<button class="btn btn-outline btn-sm btn-absent" data-id="${r.id}">Absent</button>` : ''}
-                <button class="btn btn-danger btn-sm btn-del" data-id="${r.id}">Delete</button>
+                <button class="btn btn-danger btn-sm btn-del" data-id="${r.id}">Delete</button>` : ''}
               </div>
             </td>
           </tr>
