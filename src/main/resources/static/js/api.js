@@ -4,11 +4,28 @@ const ATT = '/api/attendance';
 const LEAVE = '/api/leaves';
 const SAL = '/api/salaries';
 
+function csrfHeader() {
+  const m = document.cookie.match(/(?:^|;\s*)XSRF-TOKEN=([^;]+)/);
+  return m ? { 'X-XSRF-TOKEN': decodeURIComponent(m[1]) } : {};
+}
+
 async function _req(url, options = {}) {
-  const r = await fetch(url, options);
+  const r = await fetch(url, {
+    ...options,
+    headers: { ...csrfHeader(), ...(options.headers || {}) },
+  });
+  if (r.status === 401) {
+    // Swap the SPA to the JS login view (except for the login call itself)
+    if (!options.noAuthRedirect && typeof window.showLogin === 'function') window.showLogin();
+    throw new Error('Unauthorized');
+  }
   if (r.status === 204) return null;
   const text = await r.text();
-  if (!r.ok) throw new Error(text || `HTTP ${r.status}`);
+  if (!r.ok) {
+    let msg = text || `HTTP ${r.status}`;
+    try { msg = JSON.parse(text).details || JSON.parse(text).message || msg; } catch {}
+    throw new Error(msg);
+  }
   if (!text) return null;
   return JSON.parse(text);
 }
@@ -69,4 +86,8 @@ export const api = {
   salCurrent:      empId         => _req(`${SAL}/employee/${empId}/current`),
   salUpdate:       (id, data)    => _req(`${SAL}/${id}`, { method: 'PUT', ...json(data) }),
   salDelete:       id            => _req(`${SAL}/${id}`, { method: 'DELETE' }),
+
+  me:              ()            => _req('/api/me', { noAuthRedirect: true }),
+  login:           (username, password) => _req('/api/auth/login', { method: 'POST', noAuthRedirect: true, ...json({ username, password }) }),
+  logout:          ()            => _req('/api/auth/logout', { method: 'POST', noAuthRedirect: true }),
 };

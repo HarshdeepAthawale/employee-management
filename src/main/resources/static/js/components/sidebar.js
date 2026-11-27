@@ -1,3 +1,5 @@
+import { api } from '../api.js';
+
 export function renderSidebar(el) {
   el.innerHTML = `
     <div class="sidebar-brand">
@@ -61,15 +63,32 @@ export function renderSidebar(el) {
       </div>
     </nav>
     <div class="sidebar-footer">
+      <div class="sidebar-user" id="sidebar-user"></div>
       <a href="/swagger-ui.html" target="_blank" class="footer-link">↗ Swagger UI</a>
       <a href="/h2-console" target="_blank" class="footer-link">↗ H2 Console</a>
       <a href="/actuator/health" target="_blank" class="footer-link">↗ Actuator Health</a>
+      <button class="footer-link footer-logout" id="btn-logout" style="text-align:left;background:none;border:none;cursor:pointer;padding:0;font-family:inherit">⎋ Sign out</button>
     </div>
   `;
+
+  document.getElementById('btn-logout')?.addEventListener('click', async () => {
+    try { await api.logout(); } catch {}
+    window.location.href = '/';
+  });
 }
 
 export function setActiveNav(page) {
   document.querySelectorAll('.nav-item[data-page]').forEach(el => {
     el.classList.toggle('active', el.dataset.page === page);
   });
+}
+
+export function setSidebarUser(user) {
+  const el = document.getElementById('sidebar-user');
+  if (!el || !user) return;
+  const roles = (user.roles || []).map(r => r.replace(/^ROLE_/, '')).join(', ');
+  el.innerHTML = `
+    <div class="sidebar-user-name">${user.username}</div>
+    <div class="sidebar-user-role"><span class="badge badge-green">${roles || 'USER'}</span></div>
+  `;
 }
